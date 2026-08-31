@@ -1,12 +1,27 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from database import get_db
+from database import engine, get_db
+from model import Menu
 
 
-app = FastAPI(title="SPB API")
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    """Create missing tables at startup and release connections at shutdown."""
+
+    Menu.metadata.create_all(bind=engine)
+    try:
+        yield
+    finally:
+        engine.dispose()
+
+
+app = FastAPI(title="SPB API", lifespan=lifespan)
 
 
 @app.get("/")

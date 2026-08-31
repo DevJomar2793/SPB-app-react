@@ -6,7 +6,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 
 # Load values from backend/.env before reading DATABASE_URL.
@@ -16,6 +16,11 @@ load_dotenv(ENV_FILE)
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise RuntimeError(f"DATABASE_URL is missing from {ENV_FILE}")
+
+
+class Base(DeclarativeBase):
+    """Base class shared by all database models."""
+
 
 # The engine manages connections to PostgreSQL.
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
